@@ -20,7 +20,7 @@ if ! command -v huggingface-cli &> /dev/null; then
     echo "Installing huggingface-cli..."
     apt update
     apt install -y python3-pip
-    pip3 install huggingface_hub
+    pip3 install -U "huggingface_hub[cli]"
 fi
 
 if [ -d "$CLONE_DIR" ]; then
