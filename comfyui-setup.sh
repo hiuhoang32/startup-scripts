@@ -12,16 +12,12 @@ echo ""
 REPO_ID="r3zenix/ps-cos-v2"
 CLONE_DIR="$HOME/ps-cos-v2"
 
-echo "[1/5] Downloading repository using HuggingFace CLI..."
+echo "[1/5] Downloading repository using HuggingFace Hub..."
 echo "-------------------------------------------"
 
-# Install huggingface_hub if not present
-if ! command -v huggingface-cli &> /dev/null; then
-    echo "Installing huggingface-cli..."
-    apt update
-    apt install -y python3-pip
-    pip3 install -U "huggingface_hub[cli]"
-fi
+# Install huggingface_hub
+echo "Installing huggingface_hub..."
+pip3 install -U "huggingface_hub[cli]"
 
 if [ -d "$CLONE_DIR" ]; then
     echo "Directory already exists. Removing old version..."
@@ -29,7 +25,7 @@ if [ -d "$CLONE_DIR" ]; then
 fi
 
 echo "Downloading repository to: $CLONE_DIR"
-huggingface-cli download "$REPO_ID" --local-dir "$CLONE_DIR" --local-dir-use-symlinks False
+hf download "$REPO_ID" --local-dir "$CLONE_DIR" --local-dir-use-symlinks False
 echo "Repository downloaded successfully"
 echo ""
 
@@ -70,6 +66,7 @@ if [ ! -d "venv" ]; then
 fi
 
 # Activate virtual environment
+# shellcheck disable=SC1091
 source venv/bin/activate
 
 # Upgrade pip
@@ -83,9 +80,16 @@ echo "-------------------------------------------"
 echo "Installing PyTorch with CUDA 12.1..."
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
+# Install xformers dependencies
+echo "Installing xformers build dependencies..."
+sudo apt install -y ninja-build build-essential cmake git python3.11-dev
+
+echo "Installing Python build tools for xformers..."
+pip install --upgrade wheel setuptools ninja
+
 # Install xformers
-echo "Installing xformers..."
-pip install xformers
+echo "Installing latest xformers..."
+pip install --upgrade xformers
 
 # Install requirements from requirements.txt if it exists
 if [ -f "requirements.txt" ]; then
@@ -93,8 +97,7 @@ if [ -f "requirements.txt" ]; then
     pip install -r requirements.txt
 else
     echo "Warning: requirements.txt not found in $COMFYUI_DIR"
-    echo "Installing common ComfyUI dependencies..."
-    pip install -r requirements.txt 2>/dev/null || echo "Continuing without requirements.txt..."
+    echo "Skipping requirements.txt installation..."
 fi
 
 echo ""
