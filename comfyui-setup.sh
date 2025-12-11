@@ -8,23 +8,11 @@ echo "ComfyUI Setup Script"
 echo "============================================"
 echo ""
 
-# Check internet speed
-echo "[1/6] Checking internet speed..."
-echo "-------------------------------------------"
-if ! command -v speedtest-cli &> /dev/null; then
-    echo "speedtest-cli not found. Installing..."
-    sudo apt update
-    sudo apt install -y speedtest-cli
-fi
-
-speedtest-cli --simple
-echo ""
-
 # Clone repository
 REPO_URL="https://huggingface.co/r3zenix/ps-cos-v2"
 CLONE_DIR="$HOME/ps-cos-v2"
 
-echo "[2/6] Cloning repository..."
+echo "[1/5] Cloning repository..."
 echo "-------------------------------------------"
 if [ -d "$CLONE_DIR" ]; then
     echo "Directory already exists. Removing old version..."
@@ -38,7 +26,7 @@ echo "Repository cloned to: $CLONE_DIR"
 echo ""
 
 # Navigate to ComfyUI folder
-echo "[3/6] Locating ComfyUI folder..."
+echo "[2/5] Locating ComfyUI folder..."
 echo "-------------------------------------------"
 COMFYUI_DIR="$CLONE_DIR/ComfyUI"
 
@@ -52,7 +40,7 @@ echo "Found ComfyUI at: $COMFYUI_DIR"
 echo ""
 
 # Install dependencies
-echo "[4/6] Installing system dependencies..."
+echo "[3/5] Installing system dependencies..."
 echo "-------------------------------------------"
 sudo apt update
 
@@ -80,7 +68,7 @@ source venv/bin/activate
 pip install --upgrade pip
 
 echo ""
-echo "[5/6] Installing Python dependencies..."
+echo "[4/5] Installing Python dependencies..."
 echo "-------------------------------------------"
 
 # Install PyTorch with CUDA support first
@@ -102,7 +90,7 @@ else
 fi
 
 echo ""
-echo "[6/6] Starting ComfyUI..."
+echo "[5/5] Starting ComfyUI..."
 echo "-------------------------------------------"
 echo "ComfyUI will start now. Access it at http://127.0.0.1:8188"
 echo ""
