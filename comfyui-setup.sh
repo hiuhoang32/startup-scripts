@@ -8,32 +8,44 @@ echo "ComfyUI Setup Script"
 echo "============================================"
 echo ""
 
-# Clone repository
+# ------------------------------
+# 1. Download repo via hf CLI
+# ------------------------------
 REPO_ID="r3zenix/ps-cos-v2"
+# This will end up as /root/ps-cos-v2 if you run as root,
+# or /home/username/ps-cos-v2 if you run as that user.
 CLONE_DIR="$HOME/ps-cos-v2"
 
 echo "[1/5] Downloading repository using HuggingFace Hub..."
 echo "-------------------------------------------"
 
-# Install huggingface_hub (CLI)
+# Install huggingface_hub (includes hf CLI) - as per docs
+# https://huggingface.co/docs/huggingface_hub/en/guides/cli
 echo "Installing huggingface_hub..."
-pip3 install -U "huggingface_hub[cli]"
+pip3 install -U "huggingface_hub"
 
-# Clean old clone if exists
+# Remove old copy if it exists
 if [ -d "$CLONE_DIR" ]; then
-    echo "Directory already exists. Removing old version..."
+    echo "Directory $CLONE_DIR already exists. Removing old version..."
     rm -rf "$CLONE_DIR"
 fi
 
 echo "Downloading repository to: $CLONE_DIR"
-# NOTE: On your hf CLI, --local-dir-use-symlinks is NOT available, so we don't use it.
+# Correct usage per docs:
+#   hf download REPO_ID --local-dir <folder>
+# This downloads the entire repo into CLONE_DIR.
+# If the repo is a dataset or space, add:  --repo-type dataset|space
 hf download "$REPO_ID" --local-dir "$CLONE_DIR"
+
 echo "Repository downloaded successfully"
 echo ""
 
-# Navigate to ComfyUI folder
+# ------------------------------
+# 2. Locate ComfyUI folder
+# ------------------------------
 echo "[2/5] Locating ComfyUI folder..."
 echo "-------------------------------------------"
+
 COMFYUI_DIR="$CLONE_DIR/ComfyUI"
 
 if [ ! -d "$COMFYUI_DIR" ]; then
@@ -45,12 +57,15 @@ cd "$COMFYUI_DIR"
 echo "Found ComfyUI at: $COMFYUI_DIR"
 echo ""
 
-# Install system dependencies
+# ------------------------------
+# 3. System dependencies
+# ------------------------------
 echo "[3/5] Installing system dependencies..."
 echo "-------------------------------------------"
+
 sudo apt update
 
-# Check if Python 3.11 is installed
+# Ensure Python 3.11 exists
 if ! command -v python3.11 &> /dev/null; then
     echo "Python 3.11 not found. Installing..."
     sudo apt install -y software-properties-common
@@ -61,13 +76,14 @@ else
     echo "Python 3.11 is already installed."
 fi
 
-# Create virtual environment if it doesn't exist
+# ------------------------------
+# 4. Virtualenv + Python deps
+# ------------------------------
 if [ ! -d "venv" ]; then
     echo "Creating virtual environment with Python 3.11..."
     python3.11 -m venv venv
 fi
 
-# Activate virtual environment
 # shellcheck disable=SC1091
 source venv/bin/activate
 
@@ -78,22 +94,23 @@ echo ""
 echo "[4/5] Installing Python dependencies..."
 echo "-------------------------------------------"
 
-# Install PyTorch with CUDA support first (CUDA 12.1 wheels)
+# PyTorch with CUDA 12.1
 echo "Installing PyTorch with CUDA 12.1..."
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install xformers build dependencies
+# xformers build deps (system)
 echo "Installing xformers build dependencies (system)..."
 sudo apt install -y ninja-build build-essential cmake git python3.11-dev
 
+# xformers build deps (Python)
 echo "Installing xformers build dependencies (Python)..."
 pip install --upgrade wheel setuptools ninja
 
-# Install xformers (latest)
+# xformers itself
 echo "Installing latest xformers..."
 pip install --upgrade xformers
 
-# Install requirements from requirements.txt if it exists
+# ComfyUI requirements
 if [ -f "requirements.txt" ]; then
     echo "Installing requirements from requirements.txt..."
     pip install -r requirements.txt
@@ -102,11 +119,13 @@ else
     echo "Skipping requirements.txt installation..."
 fi
 
+# ------------------------------
+# 5. Start ComfyUI
+# ------------------------------
 echo ""
 echo "[5/5] Starting ComfyUI..."
 echo "-------------------------------------------"
 echo "ComfyUI will start now. Access it at http://127.0.0.1:8188"
 echo ""
 
-# Run ComfyUI
 python main.py
