@@ -15,17 +15,19 @@ CLONE_DIR="$HOME/ps-cos-v2"
 echo "[1/5] Downloading repository using HuggingFace Hub..."
 echo "-------------------------------------------"
 
-# Install huggingface_hub
+# Install huggingface_hub (CLI)
 echo "Installing huggingface_hub..."
 pip3 install -U "huggingface_hub[cli]"
 
+# Clean old clone if exists
 if [ -d "$CLONE_DIR" ]; then
     echo "Directory already exists. Removing old version..."
     rm -rf "$CLONE_DIR"
 fi
 
 echo "Downloading repository to: $CLONE_DIR"
-hf download "$REPO_ID" --local-dir "$CLONE_DIR" --local-dir-use-symlinks False
+# NOTE: On your hf CLI, --local-dir-use-symlinks is NOT available, so we don't use it.
+hf download "$REPO_ID" --local-dir "$CLONE_DIR"
 echo "Repository downloaded successfully"
 echo ""
 
@@ -43,7 +45,7 @@ cd "$COMFYUI_DIR"
 echo "Found ComfyUI at: $COMFYUI_DIR"
 echo ""
 
-# Install dependencies
+# Install system dependencies
 echo "[3/5] Installing system dependencies..."
 echo "-------------------------------------------"
 sudo apt update
@@ -76,18 +78,18 @@ echo ""
 echo "[4/5] Installing Python dependencies..."
 echo "-------------------------------------------"
 
-# Install PyTorch with CUDA support first
+# Install PyTorch with CUDA support first (CUDA 12.1 wheels)
 echo "Installing PyTorch with CUDA 12.1..."
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install xformers dependencies
-echo "Installing xformers build dependencies..."
+# Install xformers build dependencies
+echo "Installing xformers build dependencies (system)..."
 sudo apt install -y ninja-build build-essential cmake git python3.11-dev
 
-echo "Installing Python build tools for xformers..."
+echo "Installing xformers build dependencies (Python)..."
 pip install --upgrade wheel setuptools ninja
 
-# Install xformers
+# Install xformers (latest)
 echo "Installing latest xformers..."
 pip install --upgrade xformers
 
