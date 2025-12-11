@@ -9,17 +9,18 @@ echo "============================================"
 echo ""
 
 # Clone repository
-REPO_URL="https://huggingface.co/r3zenix/ps-cos-v2"
+REPO_ID="r3zenix/ps-cos-v2"
 CLONE_DIR="$HOME/ps-cos-v2"
 
-echo "[1/5] Cloning repository..."
+echo "[1/5] Downloading repository using HuggingFace CLI..."
 echo "-------------------------------------------"
 
-# Install git-lfs if not present
-if ! command -v git-lfs &> /dev/null; then
-    echo "Installing git-lfs..."
+# Install huggingface_hub if not present
+if ! command -v huggingface-cli &> /dev/null; then
+    echo "Installing huggingface-cli..."
     apt update
-    apt install -y git-lfs
+    apt install -y python3-pip
+    pip3 install huggingface_hub
 fi
 
 if [ -d "$CLONE_DIR" ]; then
@@ -27,10 +28,9 @@ if [ -d "$CLONE_DIR" ]; then
     rm -rf "$CLONE_DIR"
 fi
 
-cd "$HOME"
-git lfs install
-git clone "$REPO_URL"
-echo "Repository cloned to: $CLONE_DIR"
+echo "Downloading repository to: $CLONE_DIR"
+huggingface-cli download "$REPO_ID" --local-dir "$CLONE_DIR" --local-dir-use-symlinks False
+echo "Repository downloaded successfully"
 echo ""
 
 # Navigate to ComfyUI folder
