@@ -14,6 +14,14 @@ CLONE_DIR="$HOME/ps-cos-v2"
 
 echo "[1/5] Cloning repository..."
 echo "-------------------------------------------"
+
+# Install git-lfs if not present
+if ! command -v git-lfs &> /dev/null; then
+    echo "Installing git-lfs..."
+    apt update
+    apt install -y git-lfs
+fi
+
 if [ -d "$CLONE_DIR" ]; then
     echo "Directory already exists. Removing old version..."
     rm -rf "$CLONE_DIR"
