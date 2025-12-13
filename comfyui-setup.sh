@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Exit on any error
 set -e
 
@@ -9,35 +8,43 @@ echo "============================================"
 echo ""
 
 # ------------------------------
-# 1. Download repo via hf CLI
+# 1. Download from DigitalOcean Spaces
 # ------------------------------
-REPO_ID="r3zenix/ps-cos-v2"
-# This will end up as /root/ps-cos-v2 if you run as root,
-# or /home/username/ps-cos-v2 if you run as that user.
+MODEL_URL="https://comfyui-retouch-model.tor1.digitaloceanspaces.com/Model.7z"
+DOWNLOAD_FILE="Model.7z"
 CLONE_DIR="$HOME/ps-cos-v2"
 
-echo "[1/5] Downloading repository using HuggingFace Hub..."
+echo "[1/5] Downloading model from DigitalOcean Spaces..."
 echo "-------------------------------------------"
 
-# Install huggingface_hub (includes hf CLI) - as per docs
-# https://huggingface.co/docs/huggingface_hub/en/guides/cli
-echo "Installing huggingface_hub..."
-pip3 install -U "huggingface_hub"
+# Install required tools
+echo "Installing required tools (wget, p7zip)..."
+sudo apt update
+sudo apt install -y wget p7zip-full
 
-# Remove old copy if it exists
+# Remove old directory if exists
 if [ -d "$CLONE_DIR" ]; then
     echo "Directory $CLONE_DIR already exists. Removing old version..."
     rm -rf "$CLONE_DIR"
 fi
 
-echo "Downloading repository to: $CLONE_DIR"
-# Correct usage per docs:
-#   hf download REPO_ID --local-dir <folder>
-# This downloads the entire repo into CLONE_DIR.
-# If the repo is a dataset or space, add:  --repo-type dataset|space
-hf download "$REPO_ID" --local-dir "$CLONE_DIR"
+# Create directory
+mkdir -p "$CLONE_DIR"
+cd "$CLONE_DIR"
 
-echo "Repository downloaded successfully"
+# Download file
+echo "Downloading from: $MODEL_URL"
+wget -O "$DOWNLOAD_FILE" "$MODEL_URL"
+
+# Extract 7z archive
+echo "Extracting $DOWNLOAD_FILE..."
+7z x "$DOWNLOAD_FILE"
+
+# Remove downloaded archive to save space
+echo "Removing archive file..."
+rm "$DOWNLOAD_FILE"
+
+echo "Model downloaded and extracted successfully"
 echo ""
 
 # ------------------------------
@@ -50,7 +57,13 @@ COMFYUI_DIR="$CLONE_DIR/ComfyUI"
 
 if [ ! -d "$COMFYUI_DIR" ]; then
     echo "Error: ComfyUI folder not found at $COMFYUI_DIR"
-    exit 1
+    echo "Checking for alternative paths..."
+    # Try to find ComfyUI in extracted files
+    COMFYUI_DIR=$(find "$CLONE_DIR" -type d -name "ComfyUI" -print -quit)
+    if [ -z "$COMFYUI_DIR" ]; then
+        echo "Error: Could not locate ComfyUI folder"
+        exit 1
+    fi
 fi
 
 cd "$COMFYUI_DIR"
