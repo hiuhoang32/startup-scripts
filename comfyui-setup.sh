@@ -19,8 +19,8 @@ echo "-------------------------------------------"
 
 # Install required tools
 echo "Installing required tools (wget, p7zip)..."
-sudo apt update
-sudo apt install -y wget p7zip-full
+apt update
+apt install -y wget p7zip-full
 
 # Remove old directory if exists
 if [ -d "$CLONE_DIR" ]; then
@@ -76,15 +76,15 @@ echo ""
 echo "[3/5] Installing system dependencies..."
 echo "-------------------------------------------"
 
-sudo apt update
+apt update
 
 # Ensure Python 3.11 exists
 if ! command -v python3.11 &> /dev/null; then
     echo "Python 3.11 not found. Installing..."
-    sudo apt install -y software-properties-common
-    sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt update
-    sudo apt install -y python3.11 python3.11-venv python3.11-dev
+    apt install -y software-properties-common
+    add-apt-repository -y ppa:deadsnakes/ppa
+    apt update
+    apt install -y python3.11 python3.11-venv python3.11-dev
 else
     echo "Python 3.11 is already installed."
 fi
@@ -113,7 +113,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 
 # xformers build deps (system)
 echo "Installing xformers build dependencies (system)..."
-sudo apt install -y ninja-build build-essential cmake git python3.11-dev
+apt install -y ninja-build build-essential cmake git python3.11-dev
 
 # xformers build deps (Python)
 echo "Installing xformers build dependencies (Python)..."
